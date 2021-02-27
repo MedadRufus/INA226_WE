@@ -16,12 +16,24 @@
 
 #include "INA226_WE.h"
 
-INA226_WE::INA226_WE(int addr){
-	i2cAddress = addr;
-}
+
 
 INA226_WE::INA226_WE(){
-	i2cAddress = 0x40;
+}
+
+
+
+/*!
+ *   @brief  Initialise sensor with given parameters / settings
+ *   @param addr the I2C address the device can be found on
+ *   @param theWire the I2C object to use, defaults to &Wire
+ *   @returns true on success, false otherwise
+ */
+void INA226_WE::begin(uint8_t addr, TwoWire *theWire) {
+  _i2caddr = addr;
+  _wire = theWire;
+  init();
+
 }
 	
 void INA226_WE::init(){	
@@ -224,25 +236,25 @@ void INA226_WE::readAndClearFlags(){
 *************************************************/
 
 void INA226_WE::writeRegister(uint8_t reg, uint16_t val){
-  Wire.beginTransmission(i2cAddress);
+  _wire->beginTransmission(_i2caddr);
   uint8_t lVal = val & 255;
   uint8_t hVal = val >> 8;
-  Wire.write(reg);
-  Wire.write(hVal);
-  Wire.write(lVal);
-  Wire.endTransmission();
+  _wire->write(reg);
+  _wire->write(hVal);
+  _wire->write(lVal);
+  _wire->endTransmission();
 }
   
 uint16_t INA226_WE::readRegister(uint8_t reg){
   uint8_t MSByte = 0, LSByte = 0;
   uint16_t regValue = 0;
-  Wire.beginTransmission(i2cAddress);
-  Wire.write(reg);
-  Wire.endTransmission();
-  Wire.requestFrom(i2cAddress,2);
-  if(Wire.available()){
-    MSByte = Wire.read();
-    LSByte = Wire.read();
+  _wire->beginTransmission(_i2caddr);
+  _wire->write(reg);
+  _wire->endTransmission();
+  _wire->requestFrom(_i2caddr,2);
+  if(_wire->available()){
+    MSByte = _wire->read();
+    LSByte = _wire->read();
   }
   regValue = (MSByte<<8) + LSByte;
   return regValue;

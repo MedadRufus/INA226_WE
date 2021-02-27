@@ -50,6 +50,8 @@
 //if not set then flag is cleared after next conversion within limits
 #define INA226_LATCH_EN			0x0001 
 
+
+
 typedef enum INA226_AVERAGES{
 	AVERAGE_1 		= 0x0000, 
 	AVERAGE_4 		= 0x0200,
@@ -97,10 +99,11 @@ typedef enum INA226_CURRENT_RANGE{
 class INA226_WE
 {
 public:	
-	INA226_WE(int addr);
 	INA226_WE();			//sets default I2C Address 0x40
   
 	void init();
+	void begin(uint8_t addr = INA226_ADDRESS , TwoWire *theWire = &Wire);
+
 	void reset_INA226();
 	void setCorrectionFactor(float corr);
 	void setAverage(INA226_AVERAGES averages);
@@ -132,14 +135,18 @@ private:
 	INA226_MEASURE_MODE deviceMeasureMode;
 	INA226_CURRENT_RANGE deviceCurrentRange;
 	INA226_ALERT_TYPE deviceAlertType; 
-	int i2cAddress;
 	uint16_t calVal;
 	uint16_t confRegCopy;
 	float currentDivider_mA;
 	float pwrMultiplier_mW;
 	void writeRegister(uint8_t reg, uint16_t val);
 	uint16_t readRegister(uint8_t reg);
+
+protected:
+	TwoWire *_wire; //!< pointer to a TwoWire object
+	uint8_t _i2caddr;  //!< I2C addr for the TwoWire interface
 };
+
 
 #endif
 
